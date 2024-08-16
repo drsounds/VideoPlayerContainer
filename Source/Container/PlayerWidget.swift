@@ -119,31 +119,41 @@ public struct PlayerWidget: View {
             WithService(PlayerService.self) { service in
                 
                 HStack {
-                    
-                    if let feature = service.feature, case let .left(.squeeze(spacing)) = feature.direction {
-                        
-                        AnyView(
-                            feature.content()
-                                .frame(maxHeight: .infinity)
-                                .transition(.move(edge: .leading))
-                        )
-                        
-                        Spacer().frame(width: spacing)
-                    }
-                    
-                    VStack {
-                        
-                        if let feature = service.feature, case let .top(.squeeze(spacing)) = feature.direction {
-                            
-                            AnyView(
-                                feature.content()
-                                    .frame(maxWidth: .infinity)
-                                    .transition(.move(edge: .top))
-                            )
-                            
-                            Spacer().frame(height: spacing)
+                    /*
+                    let feature = service.feature
+                    if service.context?.feature != nil {
+                        if case let .left(squeeze) = feature!.direction {
+                            switch squeeze {
+                            case .squeeze(let spacing):
+                                
+                                AnyView(
+                                    feature!.content()
+                                        .frame(maxHeight: .infinity)
+                                        .transition(.move(edge: .leading))
+                                )
+                                
+                                Spacer().frame(width: spacing)
+                            default:
+                                Spacer()
+                            }
                         }
-                        
+                    }
+                    */
+                    VStack {
+                        /*
+                        if let feature = service.feature {
+                            if case let .top(.squeeze(spacing)) = feature.direction {
+                                
+                                AnyView(
+                                    feature.content()
+                                        .frame(maxWidth: .infinity)
+                                        .transition(.move(edge: .top))
+                                )
+                                
+                                Spacer().frame(height: spacing)
+                            }
+                        }
+                        */
                         ZStack {
                             
                             if service.overlays.contains(.render) {
