@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 /// Service used by ``PlayerWidget``
 ///
@@ -24,9 +25,19 @@ public class PlayerService: Service {
     
     @ViewState fileprivate var overlayAfterToast:( ()->AnyView )?
     
-    @StateSync(serviceType: FeatureService.self, keyPath: \.$feature) fileprivate var feature
-    
     @ViewState fileprivate var overlays = Overlay.allCases
+    
+    @ViewState fileprivate var feature: FeatureService.Feature?
+    
+    fileprivate var cancellables = [AnyCancellable]()
+    
+    public required init(_ context: Context) {
+        super.init(context)
+        
+        context[FeatureService.self].$feature.sink { [weak self] feature in
+            self?.feature = feature
+        }.store(in: &cancellables)
+    }
     
     /// Reference used by other API like ``enable(overlays:)`` or ``configure(overlay:overlayGetter:)``
     public enum Overlay: CaseIterable {
@@ -119,41 +130,23 @@ public struct PlayerWidget: View {
             WithService(PlayerService.self) { service in
                 
                 HStack {
-                    /*
-                    let feature = service.feature
-                    if service.context?.feature != nil {
-                        if case let .left(squeeze) = feature!.direction {
-                            switch squeeze {
-                            case .squeeze(let spacing):
-                                
-                                AnyView(
-                                    feature!.content()
-                                        .frame(maxHeight: .infinity)
-                                        .transition(.move(edge: .leading))
-                                )
-                                
-                                Spacer().frame(width: spacing)
-                            default:
-                                Spacer()
-                            }
-                        }
+                    if let feature = service.feature, case let .left(.squeeze(spacing)) = feature.direction {
+                        AnyView(
+                            feature.content()
+                                .frame(maxHeight: .infinity)
+                                .transition(.move(edge: .leading))
+                        )
                     }
-                    */
                     VStack {
-                        /*
-                        if let feature = service.feature {
-                            if case let .top(.squeeze(spacing)) = feature.direction {
-                                
-                                AnyView(
-                                    feature.content()
-                                        .frame(maxWidth: .infinity)
-                                        .transition(.move(edge: .top))
-                                )
-                                
-                                Spacer().frame(height: spacing)
-                            }
+                        if let feature = service.feature, case let .top(.squeeze(spacing)) = feature.direction {
+                            AnyView(
+                                feature.content()
+                                    .frame(maxWidth: .infinity)
+                                    .transition(.move(edge: .top))
+                            )
+                            
+                            Spacer().frame(height: spacing)
                         }
-                        */
                         ZStack {
                             
                             if service.overlays.contains(.render) {
